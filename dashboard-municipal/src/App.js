@@ -1,4 +1,9 @@
-import React, { useState } from 'react';
+import { 
+  useState,
+  useEffect
+
+} from 'react';
+import axios from 'axios';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('Todas las categorías');
@@ -6,6 +11,36 @@ export default function App() {
   const [selectedCommittee, setSelectedCommittee] = useState('Todas las juntas');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
+  // get data from http://ec2-52-73-158-201.compute-1.amazonaws.com:8000/publicaciones/
+  // use axios to get data from the API
+  const [publicaciones, setPublicaciones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Realiza la solicitud a la API cuando el componente se monta
+    axios.get('http://34.237.37.83:8000/publicaciones/')
+      .then(response => {
+        // Actualiza el estado con las publicaciones recibidas
+
+        setPublicaciones(response.data.results);
+        console.log(response.data.results);
+        setLoading(false); // Indica que ya no está cargando
+      })
+      .catch(err => {
+        // Si ocurre un error, lo guarda en el estado
+        setError(err);
+        setLoading(false);
+      });
+  }, []); // [] asegura que se ejecute solo una vez, al montar el componente
+
+
+
+
+
+
+
 
   const menuItems = ['Dashboard', 'Publicaciones', 'Anuncios', 'Reportes', 'Mapa', 'Cerrar Sesión'];
 
@@ -35,7 +70,7 @@ export default function App() {
       committee: 'SEDE SOCIAL PUEBLO DE AYQUINA'
     }
   ];
-
+  // console.log(publicaciones.results)
   return (
     <div style={styles.container}>
       <div style={styles.sidebar}>
@@ -102,6 +137,7 @@ export default function App() {
             <button style={{...styles.button, ...styles.buttonGreen}}>Aplicar filtros</button>
           </div>
         </div>
+        {/* LISTADO DE PUBLICACIONES */}
         <table style={styles.table}>
           <thead>
             <tr>
@@ -114,14 +150,14 @@ export default function App() {
             </tr>
           </thead>
           <tbody>
-            {publications.map((pub, index) => (
+            {publicaciones.map((pub, index) => (
               <tr key={index}>
-                <td style={styles.tableCell}>{pub.title}</td>
-                <td style={styles.tableCell}>{pub.description}</td>
-                <td style={styles.tableCell}>{pub.status}</td>
-                <td style={styles.tableCell}>{pub.category}</td>
-                <td style={styles.tableCell}>{pub.date}</td>
-                <td style={styles.tableCell}>{pub.committee}</td>
+                <td style={styles.tableCell}>{pub.titulo}</td>
+                <td style={styles.tableCell}>{pub.descripcion}</td>
+                <td style={styles.tableCell}>{pub.situacion.nombre}</td>
+                <td style={styles.tableCell}>{pub.categoria.nombre}</td>
+                <td style={styles.tableCell}>{pub.fecha_publicacion}</td>
+                <td style={styles.tableCell}>{pub.junta_vecinal.nombre_calle}</td>
               </tr>
             ))}
           </tbody>
